@@ -11,7 +11,6 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // Sets swing constants
 /////
 
-namespace ez {
 // Slew constants
 void Drive::slew_drive_constants_forward_set(okapi::QLength distance, int min_speed) {
   double dist = distance.convert(okapi::inch);
@@ -162,4 +161,3 @@ void Drive::pid_drive_set(double target, int speed, bool slew_on, bool toggle_he
   // Run task
   drive_mode_set(DRIVE);
 }
-}  // namespace ez

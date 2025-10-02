@@ -7,7 +7,6 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "EZ-Template/api.hpp"
 #include "EZ-Template/util.hpp"
 
-namespace ez {
 // Returns a distance that the robot is away from target, but this keeps sign.
 double Drive::is_past_target(pose target, pose current) {
   // Translated current x, y translated around origin
@@ -358,4 +357,3 @@ double Drive::new_turn_target_compute(double target, double current, ez::e_angle
   }
   return new_target;
 }
-}  // namespace ez

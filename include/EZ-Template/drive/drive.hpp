@@ -6,10 +6,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #pragma once
 
-#include <deque>
 #include <functional>
 #include <iostream>
-#include <stack>
 #include <tuple>
 
 #include "EZ-Template/PID.hpp"
@@ -22,7 +20,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "pros/motor_group.hpp"
 #include "pros/motors.h"
 
-//using namespace ez;
+using namespace ez;
 
 namespace ez {
 class Drive {
@@ -65,14 +63,9 @@ class Drive {
   std::vector<int> pto_active;
 
   /**
-   * Current focused Inertial sensor.
+   * Inertial sensor.
    */
-  pros::Imu* imu;
-
-  /**
-   * All good imus, for redundancy.
-   */
-  std::deque<pros::Imu*> good_imus;
+  pros::Imu imu;
 
   /**
    * Deprecated left tracking wheel.
@@ -386,7 +379,7 @@ class Drive {
   /**
    * Calibrates imu and initializes sd card to curve.
    */
-  void initialize(bool run_loading_animation = true);
+  void initialize();
 
   /**
    * Tasks for autonomous.
@@ -476,27 +469,6 @@ class Drive {
    *        make ports negative if reversed
    */
   Drive(std::vector<int> left_motor_ports, std::vector<int> right_motor_ports, int imu_port, double wheel_diameter, double ratio, int left_rotation_port, int right_rotation_port) __attribute__((deprecated("Use the integrated encoder constructor with odom_tracker_left_set() and odom_tracker_right_set() instead!")));
-
-  /**
-   * Creates a Drive Controller using internal encoders with redundant IMUs.
-   *
-   * \param left_motor_ports
-   *        input {1, -2...}. make ports negative if reversed
-   * \param right_motor_ports
-   *        input {-3, 4...}. make ports negative if reversed
-   * \param imu_port
-   *        input {5, 6...}. multiple IMU ports
-   * \param wheel_diameter
-   *        diameter of your drive wheels
-   * \param ticks
-   *        motor cartridge RPM
-   * \param ratio
-   *        external gear ratio, wheel gear / motor gear
-   */
-  Drive(std::vector<int> left_motor_ports, std::vector<int> right_motor_ports, std::vector<int> imu_ports, double wheel_diameter, double ticks, double ratio = 1.0);
-
-  // Deconstructor
-  ~Drive();
 
   /**
    * Sets drive defaults.
@@ -1268,88 +1240,11 @@ class Drive {
   /**
    * Gets the current state of the toggle.
    *
+   * This toggles printing in autonomous.
+   *
    * True enabled, false disabled.
    */
   bool pid_print_toggle_get();
-
-  /**
-   * Sets the button to increment the PID constants.
-   *
-   * \param increase
-   *        a pros controller button
-   */
-  void pid_tuner_button_increment_set(pros::controller_digital_e_t increase);
-
-  /**
-   * Returns the pros button to increment the PID constants.
-   */
-  pros::controller_digital_e_t pid_tuner_button_increment_get();
-
-  /**
-   * Sets the button to decrement the PID constants.
-   *
-   * \param decrease
-   *        a pros controller button
-   */
-  void pid_tuner_button_decrement_set(pros::controller_digital_e_t decrease);
-
-  /**
-   * Returns the pros button to decrement the PID constants.
-   */
-  pros::controller_digital_e_t pid_tuner_button_decrement_get();
-
-  /**
-   * Sets the button to go up between the PID constants.
-   *
-   * \param pageUp
-   *        a pros controller button
-   */
-  void pid_tuner_button_up_set(pros::controller_digital_e_t pageUp);
-
-  /**
-   * Returns the pros button to go up between the PID constants.
-   */
-  pros::controller_digital_e_t pid_tuner_button_up_get();
-
-  /**
-   * Sets the button to go down between the PID constants.
-   *
-   * \param pageDown
-   *        a pros controller button
-   */
-  void pid_tuner_button_down_set(pros::controller_digital_e_t pageDown);
-
-  /**
-   * Returns the pros button to go down between the PID constants.
-   */
-  pros::controller_digital_e_t pid_tuner_button_down_get();
-
-  /**
-   * Sets the button to go left in the PID Tuner.
-   *
-   * \param pageLeft
-   *        a pros controller button
-   */
-
-  void pid_tuner_button_left_set(pros::controller_digital_e_t pageLeft);
-
-  /**
-   * Returns the pros button to go left in the PID Tuner.
-   */
-  pros::controller_digital_e_t pid_tuner_button_left_get();
-
-  /**
-   * Sets the button to go right in the PID Tuner.
-   *
-   * \param pageRight
-   *        a pros controller button
-   */
-  void pid_tuner_button_right_set(pros::controller_digital_e_t pageRight);
-
-  /**
-   * Returns the pros button to go right in the PID Tuner.
-   */
-  pros::controller_digital_e_t pid_tuner_button_right_get();
 
   /////
   //
@@ -1453,24 +1348,6 @@ class Drive {
    */
   double drive_imu_scaler_get();
 
-  std::map<int, double> imu_scale_map;
-  std::map<int, std::pair<double, int>> prev_imu_values;
-
-  /*
-   * Sets a new IMU scaling factor for all IMUs.
-   *
-   * This value is multiplied by the imu to change its output.
-   *
-   * \param scales
-   *        input {0.99, 1.01...}
-   */
-  void drive_imus_scalers_set(std::vector<double> scales);
-
-  /*
-   * Returns the scaling factor for all IMUs.
-   */
-  std::map<int, double> drive_imus_scalers_get();
-
   /**
    * Calibrates the IMU, recommended to run in initialize().
    *
@@ -1490,11 +1367,6 @@ class Drive {
    * Loading display while the IMU calibrates.
    */
   void drive_imu_display_loading(int iter);
-
-  /**
-   * Get angle of the robot, depending on focused sensor.
-   */
-  double drive_angle_get();
 
   /**
    * Practice mode for driver practice that shuts off the drive if you go max speed.
@@ -3427,7 +3299,7 @@ class Drive {
   /**
    * Sets the value that PID Tuner increments I.
    *
-   * \param i
+   * \param p
    *        i will increase by this
    */
   void pid_tuner_increment_i_set(double i);
@@ -3435,7 +3307,7 @@ class Drive {
   /**
    * Sets the value that PID Tuner increments D.
    *
-   * \param d
+   * \param p
    *        d will increase by this
    */
   void pid_tuner_increment_d_set(double d);
@@ -3443,7 +3315,7 @@ class Drive {
   /**
    * Sets the value that PID Tuner increments Start I.
    *
-   * \param start_i
+   * \param p
    *        start i will increase by this
    */
   void pid_tuner_increment_start_i_set(double start_i);
@@ -3489,16 +3361,6 @@ class Drive {
   };
 
   /**
-   * Adds PIDs to the PID Tuner.
-   *
-   * This adds to both the default tuner and the full tuner.
-   *
-   * \param new_pid_and_name
-   *        {"name", &pid.constants}
-   */
-  void pid_tuner_add(const_and_name new_pid_and_name);
-
-  /**
    * Vector used for a simplified PID Tuner
    */
   std::vector<const_and_name> pid_tuner_pids = {
@@ -3525,7 +3387,7 @@ class Drive {
   /**
    * Sets the max speed for user control.
    *
-   * \param speed
+   * \param int
    *        the speed limit
    */
   void opcontrol_speed_max_set(int speed);
@@ -3538,7 +3400,7 @@ class Drive {
   /**
    * Toggles vector scaling for arcade control.  True enables, false disables.
    *
-   * \param enable
+   * \param bool
    *        true enables, false disables
    */
   void opcontrol_arcade_scaling(bool enable);
@@ -3548,33 +3410,7 @@ class Drive {
    */
   bool opcontrol_arcade_scaling_enabled();
 
-  /**
-   * Current odom position.
-   */
-  pose odom_current = {0.0, 0.0, 0.0};
-
-  /**
-   * Tracking task that uses tracking wheels, this is used by default.
-   */
-  void tracking_wheels_tracking();
-
-  /**
-   * Sets a new task to use for tracking.
-   *
-   * In this function, you must:
-   *  - odom_current.x =
-   *  - odom_current.y =
-   *  - odom_current.theta =
-   *
-   * This function does not need to loop, that is done for you in EZ-Template.
-   *
-   * \param tracking_task
-   *        new function for tracking
-   */
-  void odom_tracking_set(std::function<void(void)> tracking_task);
-
  private:
-  std::function<void(void)> tracking;
   void opcontrol_drive_activebrake_targets_set();
   double odom_smooth_weight_smooth = 0.0;
   double odom_smooth_weight_data = 0.0;
@@ -3587,7 +3423,6 @@ class Drive {
   std::vector<const_and_name>* used_pid_tuner_pids;
   double opcontrol_speed_max = 127.0;
   bool arcade_vector_scaling = false;
-  double prev_imu_value = 0;
   // odom privates
   std::vector<odom> pp_movements;
   std::vector<int> injected_pp_index;
@@ -3619,6 +3454,7 @@ class Drive {
   double global_track_width = 0.0;
   bool odometry_enabled = true;
   pose odom_target = {0.0, 0.0, 0.0};
+  pose odom_current = {0.0, 0.0, 0.0};
   pose odom_second_to_last = {0.0, 0.0, 0.0};
   pose odom_start = {0.0, 0.0, 0.0};
   pose odom_target_start = {0.0, 0.0, 0.0};
@@ -3677,6 +3513,8 @@ class Drive {
   double used_motion_chain_scale = 0.0;
   bool motion_chain_backward = false;
 
+  double IMU_SCALER = 1.0;
+
   bool drive_toggle = true;
   bool print_toggle = true;
   int swing_min = 0;
@@ -3704,18 +3542,6 @@ class Drive {
   std::string complete_pid_tuner_output = "";
   float p_increment = 0.1, i_increment = 0.001, d_increment = 0.25, start_i_increment = 1.0;
 
-  pros::controller_digital_e_t pid_tuner_increase;  // is this place good?
-  pros::controller_digital_e_t pid_tuner_decrease;  // ^yes this placement is fine :D
-  pros::controller_digital_e_t pid_tuner_pageLeft;
-  pros::controller_digital_e_t pid_tuner_pageRight;
-  pros::controller_digital_e_t pid_tuner_pageUp;
-  pros::controller_digital_e_t pid_tuner_pageDown;
-
-  /**
-   * @brief
-   * Get the scaled imu value from given imu
-   */
-  double get_this_imu(pros::Imu* imu);
   /**
    * Private wait until for drive
    */
@@ -3768,7 +3594,6 @@ class Drive {
   void ptp_task();
   void boomerang_task();
   void pp_task();
-  void check_imu_task();
 
   /**
    * Starting value for left/right

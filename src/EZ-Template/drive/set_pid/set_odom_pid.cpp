@@ -7,7 +7,6 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "EZ-Template/drive/drive.hpp"
 #include "okapi/api/units/QAngle.hpp"
 
-namespace ez {
 /////
 // Set constants
 /////
@@ -403,7 +402,7 @@ void Drive::raw_pid_odom_ptp_set(odom imovement, bool slew_on) {
   point_to_face = find_point_to_face(odom_pose_get(), {imovement.target.x, imovement.target.y}, current_drive_direction, true);
   double target = util::absolute_angle_to_point(point_to_face[!ptf1_running], odom_pose_get());  // Calculate the point for angle to face
   if (imovement.turn_behavior != raw) {
-    odom_imu_start = drive_angle_get();
+    odom_imu_start = drive_imu_get();
     current_angle_behavior = imovement.turn_behavior;
   }
 
@@ -493,4 +492,3 @@ void Drive::raw_pid_odom_ptp_set(odom imovement, bool slew_on) {
   leftPID.exit = xyPID.exit;  // Switch over to xy pid exits
   rightPID.exit = xyPID.exit;
 }
-}  // namespace ez

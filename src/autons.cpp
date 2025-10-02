@@ -15,7 +15,7 @@ const int SWING_SPEED = 110;
 ///
 void default_constants() {
   // P, I, D, and Start I
-  chassis.pid_drive_constants_set(20.0, 0.0, 100.0);         // fwd/rev constants, used for odom and non odom motions
+  chassis.pid_drive_constants_set(20.0, 0.0, 100.0);         // Fwd/rev constants, used for odom and non odom motions
   chassis.pid_heading_constants_set(11.0, 0.0, 20.0);        // Holds the robot straight while going forward without odom
   chassis.pid_turn_constants_set(3.0, 0.05, 20.0, 15.0);     // Turn in place constants
   chassis.pid_swing_constants_set(6.0, 0.0, 65.0);           // Swing constants
@@ -259,14 +259,14 @@ void odom_drive_example() {
 ///
 void odom_pure_pursuit_example() {
   // Drive to 0, 30 and pass through 6, 10 and 0, 20 on the way, with slew
-  chassis.pid_odom_set({{{6_in, 10_in}, ez::fwd, DRIVE_SPEED},
-                        {{0_in, 20_in}, ez::fwd, DRIVE_SPEED},
-                        {{0_in, 30_in}, ez::fwd, DRIVE_SPEED}},
+  chassis.pid_odom_set({{{6_in, 10_in}, fwd, DRIVE_SPEED},
+                        {{0_in, 20_in}, fwd, DRIVE_SPEED},
+                        {{0_in, 30_in}, fwd, DRIVE_SPEED}},
                        true);
   chassis.pid_wait();
 
   // Drive to 0, 0 backwards
-  chassis.pid_odom_set({{0_in, 0_in}, ez::rev, DRIVE_SPEED},
+  chassis.pid_odom_set({{0_in, 0_in}, rev, DRIVE_SPEED},
                        true);
   chassis.pid_wait();
 }
@@ -275,9 +275,9 @@ void odom_pure_pursuit_example() {
 // Odom Pure Pursuit Wait Until
 ///
 void odom_pure_pursuit_wait_until_example() {
-  chassis.pid_odom_set({{{0_in, 24_in}, ez::fwd, DRIVE_SPEED},
-                        {{12_in, 24_in}, ez::fwd, DRIVE_SPEED},
-                        {{24_in, 24_in}, ez::fwd, DRIVE_SPEED}},
+  chassis.pid_odom_set({{{0_in, 24_in}, fwd, DRIVE_SPEED},
+                        {{12_in, 24_in}, fwd, DRIVE_SPEED},
+                        {{24_in, 24_in}, fwd, DRIVE_SPEED}},
                        true);
   chassis.pid_wait_until_index(1);  // Waits until the robot passes 12, 24
   // Intake.move(127);  // Set your intake to start moving once it passes through the second point in the index
@@ -289,11 +289,11 @@ void odom_pure_pursuit_wait_until_example() {
 // Odom Boomerang
 ///
 void odom_boomerang_example() {
-  chassis.pid_odom_set({{0_in, 24_in, 45_deg}, ez::fwd, DRIVE_SPEED},
+  chassis.pid_odom_set({{0_in, 24_in, 45_deg}, fwd, DRIVE_SPEED},
                        true);
   chassis.pid_wait();
 
-  chassis.pid_odom_set({{0_in, 0_in, 0_deg}, ez::rev, DRIVE_SPEED},
+  chassis.pid_odom_set({{0_in, 0_in, 0_deg}, rev, DRIVE_SPEED},
                        true);
   chassis.pid_wait();
 }
@@ -302,13 +302,13 @@ void odom_boomerang_example() {
 // Odom Boomerang Injected Pure Pursuit
 ///
 void odom_boomerang_injected_pure_pursuit_example() {
-  chassis.pid_odom_set({{{0_in, 24_in, 45_deg}, ez::fwd, DRIVE_SPEED},
-                        {{12_in, 24_in}, ez::fwd, DRIVE_SPEED},
-                        {{24_in, 24_in}, ez::fwd, DRIVE_SPEED}},
+  chassis.pid_odom_set({{{0_in, 24_in, 45_deg}, fwd, DRIVE_SPEED},
+                        {{12_in, 24_in}, fwd, DRIVE_SPEED},
+                        {{24_in, 24_in}, fwd, DRIVE_SPEED}},
                        true);
   chassis.pid_wait();
 
-  chassis.pid_odom_set({{0_in, 0_in, 0_deg}, ez::rev, DRIVE_SPEED},
+  chassis.pid_odom_set({{0_in, 0_in, 0_deg}, rev, DRIVE_SPEED},
                        true);
   chassis.pid_wait();
 }
@@ -345,7 +345,7 @@ void measure_offsets() {
     pros::delay(250);
 
     // Calculate delta in angle
-    double t_delta = ez::util::to_rad(fabs(ez::util::wrap_angle(chassis.odom_theta_get() - imu_start)));
+    double t_delta = util::to_rad(fabs(util::wrap_angle(chassis.odom_theta_get() - imu_start)));
 
     // Calculate delta in sensor values that exist
     double l_delta = chassis.odom_tracker_left != nullptr ? chassis.odom_tracker_left->get() : 0.0;

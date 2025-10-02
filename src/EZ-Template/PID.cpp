@@ -7,8 +7,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "EZ-Template/api.hpp"
 #include "api.h"
 
-// using namespace ez;
-namespace ez {
+using namespace ez;
+
 void PID::variables_reset() {
   output = 0;
   target = 0;
@@ -258,4 +258,3 @@ exit_output PID::exit_condition(pros::MotorGroup sensor, bool print) {
   }
   return exit_condition(vector_sensor, print);
 }
-}  // namespace ez

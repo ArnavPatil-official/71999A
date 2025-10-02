@@ -7,7 +7,6 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "EZ-Template/api.hpp"
 #include "okapi/api/units/QAngle.hpp"
 
-namespace ez {
 // Updates max speed
 void Drive::pid_speed_max_set(int speed) {
   max_speed = abs(util::clamp(speed, 127, -127));
@@ -75,4 +74,3 @@ bool Drive::pid_drive_toggle_get() { return drive_toggle; }
 // Don't print stuff
 void Drive::pid_print_toggle(bool toggle) { print_toggle = toggle; }
 bool Drive::pid_print_toggle_get() { return print_toggle; }
-}  // namespace ez
