@@ -3,7 +3,7 @@ layout: default
 title: Odom Movements
 description: make robor go to coordinates by itself
 ---
-[Tracker pods](/docs/odom_general) are required for odom movements.
+
 
 ## How does it work?
 
