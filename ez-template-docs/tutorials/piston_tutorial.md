@@ -207,7 +207,7 @@ void opcontrol() {
 
 
 ## Using it in Autonomous
-Because the piston is created in `subsystmes.hpp`, we can access is in autonomous exactly the same way!  
+Because the piston is created in `subsystems.hpp`, we can access is in autonomous exactly the same way!  
 
 In the example below, the robot will actuate the piston after driving 6" and will retract once it's driven 24".  The piston will not actuate again until it starts to come back and will retract once it's back to where it started.  
 ```cpp
