@@ -5,6 +5,12 @@
 // https://ez-robotics.github.io/EZ-Template/
 /////
 
+
+// SOME NOTES:
+// THIS IS MAIN, THIS IS WHERE YOUR CONTROLS AND AUTONOMOUS CALLS ARE
+// AUTONS ARE IN AUTONS.CPP, CHANGE THE ACTUAL AUTON CODE THERE
+// to change motors and pistons go to subsystems.hpp
+
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
@@ -58,15 +64,17 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-      {"Skills", skills},
-      {"red", red},
-      {"Skills (Intake Only)", blue},
+      {"Skills", skills}, // THIS IS WHERE U CHANGE WHAT AUTON RUNS, THE FIRST IS THE DEFAULT AUTON
+      {"red", red}, // SECOND oN AUTON SLECTOR
+      {"Skills (Intake Only)", blue}, // u can keep adding stuff
   });
 
   // Initialize chassis and auton selector
   chassis.initialize();
   ez::as::initialize();
   master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
+
+  // dont change anything here besides the auton being called
 }
 
 /**
@@ -248,7 +256,9 @@ void opcontrol() {
   //  chassis.opcontrol_arcade_flipped(ez::SPLIT);    // Flipped split arcade
     // chassis.opcontrol_arcade_flipped(ez::SINGLE);   // Flipped single arcade
     
-    // if (master.get_digital_new_press(DIGITAL_Y)) {
+
+    // THESE ARE SAFWAAN'S CONTROLS:
+    // if (master.get_digital_new_press(DIGITAL_Y)) { // <-- new_press means u press it once
     //   match_loader_toggle = !match_loader_toggle;
     //   match_loader.set(match_loader_toggle);
 
@@ -261,7 +271,7 @@ void opcontrol() {
     // }
 
     // // R1: top stage scores high goal + descorer up
-    // if (master.get_digital(DIGITAL_R1)) {
+    // if (master.get_digital(DIGITAL_R1)) { <-- get_digital is for holding it down
     //   intake2.move(127);
     //   stage.set(true);
     // }
@@ -292,7 +302,7 @@ void opcontrol() {
     //   stage.set(stage_toggle);
     // }
 
-//   sid:
+//   sid: (not needed)
 //   R1 - bottom intake picks up, top reverse
   // R2 - both pick up
   // L1 - click once to open the lower scoring piston and again to close it

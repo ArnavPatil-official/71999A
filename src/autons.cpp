@@ -32,6 +32,7 @@ void default_constants() {
   //   big_error:          loose error threshold — robot is "close enough" (deg / in)
   //   velocity_exit_time: how long robot must be near-zero velocity to exit (ms)
   //   mA_timeout:         how long robot must be drawing excess current to exit / give up (ms)
+  // be careful abt changing these. too high and it'll be too slow too low and it skips movements
   chassis.pid_turn_exit_condition_set(2_ms, 3_deg, 250_ms, 7_deg, 500_ms, 500_ms);
   chassis.pid_swing_exit_condition_set(2_ms, 3_deg, 250_ms, 7_deg, 500_ms, 500_ms);
   chassis.pid_drive_exit_condition_set(2_ms, 1_in, 250_ms, 3_in, 500_ms, 500_ms);
@@ -42,12 +43,14 @@ void default_constants() {
   chassis.pid_turn_chain_constant_set(3_deg);
   chassis.pid_swing_chain_constant_set(5_deg);
   chassis.pid_drive_chain_constant_set(3_in);
-
+ // to chain movements: use pid_wait_quick_chain() instead of pid_wait() after your motion. chaining makes it faster but slightly less consistent
+ // chaining also makes u change the inches/how much u drive too if u change from normal to chained
   // Slew constants
   chassis.slew_turn_constants_set(3_deg, 70);
   chassis.slew_drive_constants_set(3_in, 70);
   chassis.slew_swing_constants_set(3_in, 80);
-
+ // slew: if you want to use slew, set the third parameter of your motion to true. this makes it so the robot ramps up its speed as it starts the motion, which can help with consistency
+ // only use slew for motions that are greater than the slew distance + a few inches, otherwise it can make it less consistent
   // The amount that turns are prioritized over driving in odom motions
   // - if you have tracking wheels, you can run this higher.  1.0 is the max
   chassis.odom_turn_bias_set(0.9);
@@ -58,7 +61,9 @@ void default_constants() {
 
   chassis.pid_angle_behavior_set(ez::shortest);  // Changes the default behavior for turning, this defaults it to the shortest path there
 }
-void red()
+
+
+void red() // match autons
 {
   chassis.pid_drive_set(2,DRIVE_SPEED);
   chassis.pid_wait();
@@ -88,6 +93,8 @@ void blue()
 }
 void skills()
 {
+
+   // skills, all this code should be pretty self explanatory
   chassis.pid_drive_set(6, DRIVE_SPEED, true);
   chassis.pid_wait();
   stage.set(true);
@@ -202,12 +209,14 @@ void skills()
   // intake2.brake();
   // chassis.pid_drive_set(10, DRIVE_SPEED, true);
   // chassis.pid_wait();
+  // ^ leave all of this commented out this is the last matchloader that we can't get rn
   match_loader.set(false);
   chassis.pid_turn_set(170, TURN_SPEED);
   chassis.pid_wait();
   chassis.pid_drive_set(20, DRIVE_SPEED, true);
   chassis.pid_wait();
-
+ // ^ park setup
+ // PUT PARK CODE HERE:
 
 }
 ///

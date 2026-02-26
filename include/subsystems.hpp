@@ -17,10 +17,10 @@ inline ez::Piston descorer('B');  // false = retracted on boot
 inline ez::Piston stage('H');  // false = retracted on boot
 
 
-inline pros::Motor leftFrontMotor(-10, pros::v5::MotorGears::green);
-inline pros::Motor leftMiddleMotor(-6, pros::v5::MotorGears::green);
-inline pros::Motor leftBackMotor(-5, pros::v5::MotorGears::green);
+// inline pros::Motor leftFrontMotor(-10, pros::v5::MotorGears::green);
+// inline pros::Motor leftMiddleMotor(-6, pros::v5::MotorGears::green);
+// inline pros::Motor leftBackMotor(-5, pros::v5::MotorGears::green);
 
-inline pros::Motor rightFrontMotor(7, pros::v5::MotorGears::green);
-inline pros::Motor rightMiddleMotor(11, pros::v5::MotorGears::green);
-inline pros::Motor rightBackMotor(2, pros::v5::MotorGears::green);
+// inline pros::Motor rightFrontMotor(7, pros::v5::MotorGears::green);
+// inline pros::Motor rightMiddleMotor(11, pros::v5::MotorGears::green);
+// inline pros::Motor rightBackMotor(2, pros::v5::MotorGears::green);
