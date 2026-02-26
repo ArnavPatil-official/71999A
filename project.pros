@@ -1,9 +1,34 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "EZ-Template",
+    "project_name": "sid",
     "target": "v5",
     "templates": {
+      "EZ-Template": {
+        "location": "/Users/arnavpatil/Library/Application Support/PROS/templates/EZ-Template@3.2.2",
+        "metadata": {
+          "origin": "local"
+        },
+        "name": "EZ-Template",
+        "py/object": "pros.conductor.templates.local_template.LocalTemplate",
+        "supported_kernels": "^4.1.1",
+        "system_files": [
+          "include\\EZ-Template\\sdcard.hpp",
+          "include\\EZ-Template\\api.hpp",
+          "include\\EZ-Template\\piston.hpp",
+          "include\\EZ-Template\\util.hpp",
+          "include\\EZ-Template\\auton.hpp",
+          "include\\EZ-Template\\slew.hpp",
+          "include\\EZ-Template\\PID.hpp",
+          "include\\EZ-Template\\tracking_wheel.hpp",
+          "firmware\\EZ-Template.a",
+          "include\\EZ-Template\\drive\\drive.hpp",
+          "include\\EZ-Template\\auton_selector.hpp"
+        ],
+        "target": "v5",
+        "user_files": [],
+        "version": "3.2.2"
+      },
       "kernel": {
         "location": "C:\\Users\\union\\AppData\\Roaming\\PROS\\templates\\kernel@4.1.1",
         "metadata": {
@@ -400,7 +425,8 @@
     },
     "upload_options": {
       "compress_bin": true,
-      "description": "roboticsisez.com",
+      "description": "e",
+      "icon": "clawbot",
       "remote_name": "EZ-Template",
       "slot": 1
     },
