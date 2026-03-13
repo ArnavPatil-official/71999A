@@ -11,6 +11,7 @@ extern Drive chassis;
 // Lower intake conveyor motors
 inline pros::Motor intake(-3);     // TODO: set correct port and gearset/reversed if needed
 inline pros::Motor intake2(-10);    // TODO: set correct port and gearset/reversed if needed
+inline pros::Optical intake_optical(6);  // TODO: set to the optical sensor port aimed at the intake path
 
 inline ez::Piston match_loader('A');  // false = retracted on boot
 inline ez::Piston descorer('B');  // false = retracted on boot

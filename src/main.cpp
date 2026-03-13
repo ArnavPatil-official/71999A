@@ -17,7 +17,7 @@ ez::Drive chassis(
     {-18,-19,-20},  // Left Chassis Ports (negative port will reverse it!)
     {7,8,5},  // Right Chassis Ports (negative port will reverse it!)  {7,11,-2},  // Left 
 
-    12,      // IMU Port
+    2,      // IMU Port
     3.25,   // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
     450.0);  // Wheel RPM = cartridge * (motor gear / wheel gear)
 
@@ -35,6 +35,7 @@ ez::Drive chassis(
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
 void initialize() {
   // Print our branding over your terminal :D
   ez::ez_template_print();
@@ -72,6 +73,8 @@ void initialize() {
   // Initialize chassis and auton selector
   chassis.initialize();
   ez::as::initialize();
+  intake_optical.set_led_pwm(100);
+  intake_optical.set_integration_time(10);
   master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
 
   // dont change anything here besides the auton being called
@@ -223,6 +226,68 @@ void ez_template_extras() {
   }
 }
 
+namespace {
+constexpr int kIntakeSpeed = 127;
+constexpr int kAntiJamReverseSpeed = -110;
+constexpr int kJamDistanceThreshold = 200;   
+constexpr int kAntiJamReverseTimeMs = 180;
+constexpr int kAntiJamRecoverTimeMs = 220;
+
+void run_intake(int lower_speed, int upper_speed) {
+  intake.move(lower_speed);
+  intake2.move(upper_speed);
+}
+
+void stop_intake() {
+  intake.brake();
+  intake2.brake();
+}
+
+void antijam(bool intake_requested) {
+  static std::uint32_t jam_start_time = 0;
+  static std::uint32_t reverse_until = 0;
+  static std::uint32_t recover_until = 0;
+
+  const std::uint32_t now = pros::millis();
+
+  if (!intake_requested) {
+    jam_start_time = 0;
+    reverse_until = 0;
+    recover_until = 0;
+    return;
+  }
+
+  if (now < reverse_until) {
+    run_intake(kAntiJamReverseSpeed, kAntiJamReverseSpeed);
+    return;
+  }
+
+  if (now < recover_until) {
+    run_intake(kIntakeSpeed, kIntakeSpeed);
+    return;
+  }
+
+  const int optical_distance = intake_optical.get_proximity();
+  const bool jam_detected = optical_distance >= kJamDistanceThreshold;
+
+  if (jam_detected) {
+    if (jam_start_time == 0) {
+      jam_start_time = now;
+    } else if (now - jam_start_time >= kJamDetectTimeMs) {
+      reverse_until = now + kAntiJamReverseTimeMs;
+      recover_until = reverse_until + kAntiJamRecoverTimeMs;
+      jam_start_time = 0;
+      run_intake(kAntiJamReverseSpeed, kAntiJamReverseSpeed);
+      return;
+    }
+  } else {
+    jam_start_time = 0;
+  }
+
+  run_intake(kIntakeSpeed, kIntakeSpeed);
+}
+}  // namespace
+
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -236,6 +301,7 @@ void ez_template_extras() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
+ 
 void opcontrol() {
   // This is preference to what you like to drive on
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
@@ -258,85 +324,84 @@ void opcontrol() {
     
 
     // THESE ARE SAFWAAN'S CONTROLS:
-    // if (master.get_digital_new_press(DIGITAL_Y)) { // <-- new_press means u press it once
-    //   match_loader_toggle = !match_loader_toggle;
-    //   match_loader.set(match_loader_toggle);
+    if (master.get_digital_new_press(DIGITAL_Y)) { // <-- new_press means u press it once
+      match_loader_toggle = !match_loader_toggle;
+      match_loader.set(match_loader_toggle);
 
-    // }
+    }
 
-    // // Left arrow toggle descorer
-    // if (master.get_digital_new_press(DIGITAL_RIGHT)) {
-    //   descorer_toggle = !descorer_toggle;
-    //   descorer.set(descorer_toggle);
-    // }
+    // Left arrow toggle descorer
+    if (master.get_digital_new_press(DIGITAL_RIGHT)) {
+      descorer_toggle = !descorer_toggle;
+      descorer.set(descorer_toggle);
+    }
 
-    // // R1: top stage scores high goal + descorer up
-    // if (master.get_digital(DIGITAL_R1)) { <-- get_digital is for holding it down
-    //   intake2.move(127);
-    //   stage.set(true);
-    // }
-    // // L1: top stage scores middle goal + descorer down
-    // else if (master.get_digital(DIGITAL_L1)) {
-    //   intake2.move(-127);
-    //   stage.set(false);
-    // }
-    // else {
-    //   intake2.brake();
-    // }
+    // R1: top stage scores high goal + descorer up
+    if (master.get_digital(DIGITAL_R1)) { <-- get_digital is for holding it down
+      intake2.move(127);
+      stage.set(true);
+    }
+    // L1: top stage scores middle goal + descorer down
+    else if (master.get_digital(DIGITAL_L1)) {
+      intake2.move(-127);
+      stage.set(false);
+    }
+    else {
+      intake2.brake();
+    }
 
-    // // R2: bottom stage intake forward
-    // if (master.get_digital(DIGITAL_R2)) {
-    //   intake.move(127);
-    // }
-    // // A: bottom stage intake backwards
-    // else if (master.get_digital(DIGITAL_L2)) {
-    //   intake.move(-127);
-    // }
-    // else {
-    //   intake.brake();
-    // }
+    // R2: bottom stage intake forward
+    if (master.get_digital(DIGITAL_R2)) {
+      intake.move(127);
+    }
+    // A: bottom stage intake backwards
+    else if (master.get_digital(DIGITAL_L2)) {
+      intake.move(-127);
+    }
+    else {
+      intake.brake();
+    }
 
-    // if (master.get_digital_new_press(DIGITAL_RIGHT))
-    // {
-    //   stage_toggle = !stage_toggle;
-    //   stage.set(stage_toggle);
-    // }
+    if (master.get_digital_new_press(DIGITAL_RIGHT))
+    {
+      stage_toggle = !stage_toggle;
+      stage.set(stage_toggle);
+    }
 
 //   sid: (not needed)
 //   R1 - bottom intake picks up, top reverse
   // R2 - both pick up
   // L1 - click once to open the lower scoring piston and again to close it
   // L2 - click once to lower descore arm, click again to put it back up
-    if (master.get_digital_new_press(DIGITAL_L2)) {
-      match_loader_toggle = !match_loader_toggle;
-      descorer.set(match_loader_toggle);
+    // if (master.get_digital_new_press(DIGITAL_L2)) {
+    //   match_loader_toggle = !match_loader_toggle;
+    //   descorer.set(match_loader_toggle);
 
-    }
+    // }
 
-    // Left arrow toggle descorer
-    if (master.get_digital_new_press(DIGITAL_UP)) {
-      descorer_toggle = !descorer_toggle;
-      match_loader.set(descorer_toggle);
-    }
+    // // Left arrow toggle descorer
+    // if (master.get_digital_new_press(DIGITAL_UP)) {
+    //   descorer_toggle = !descorer_toggle;
+    //   match_loader.set(descorer_toggle);
+    // }
 
-    // R1: top stage scores high goal + descorer up
-    if (master.get_digital(DIGITAL_R1)) {
-      intake.move(127);
-    }
-    // L1: top stage scores middle goal + descorer down
-    else if (master.get_digital(DIGITAL_R2)) {
-      intake2.move(127);
-      intake.move(127);
-    }
-    else if(master.get_digital(DIGITAL_RIGHT))
-    {
-      intake.move(-127);
-      intake2.move(-127);
-    }
-    else {
-      intake.brake();
-      intake2.brake();
-    }
+    // const bool lower_intake_only = master.get_digital(DIGITAL_R1);
+    // const bool full_intake = master.get_digital(DIGITAL_R2);
+    // const bool reverse_intake = master.get_digital(DIGITAL_RIGHT);
+
+    // if (reverse_intake) {
+    //   run_intake(-127, -127);
+    //   antijam(false);
+    // } else if (full_intake) {
+    //   antijam(true);
+    // } else if (lower_intake_only) {
+    //   intake.move(127);
+    //   intake2.brake();
+    //   antijam(false);
+    // } else {
+    //   antijam(false);
+    //   stop_intake();
+    // }
 
    
 
